@@ -1,0 +1,9 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="JavadocDeclaration" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="ADDITIONAL_TAGS" value="Date：2023/9/14,Author：Victor_htq,Package：com.victor,Project：Spring,name：Test,Filename：Test" />
+    </inspection_tool>
+    <inspection_tool class="MismatchedJavadocCode" enabled="false" level="WARNING" enabled_by_default="false" />
+  </profile>
+</component>
