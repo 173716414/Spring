@@ -1,7 +1,9 @@
 package com.spring;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Author：Victor_htq
@@ -15,12 +17,44 @@ public class VictorApplicationContext {
 
     private Class configClass;
 
+    private ConcurrentHashMap<String, Object> singletonObjects = new ConcurrentHashMap<>(); //单例池
+    private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(); //单例池
     public VictorApplicationContext(Class configClass) {
         this.configClass = configClass;
 
+        // 解析配置类
+        scan(configClass);
+
+        for (String beanName : beanDefinitionMap.keySet()) {
+            BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+            if (beanDefinition.getScope().equals("singleton")) {
+                Object bean = createBean(beanDefinition);
+                singletonObjects.put(beanName, bean);
+            }
+        }
+    }
+
+    public Object createBean(BeanDefinition beanDefinition) {
+
+        Class clazz = beanDefinition.getClazz();
+        try {
+            Object instance = clazz.getDeclaredConstructor().newInstance();
+            return instance;
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        // return null;
+    }
+    private void scan(Class configClass) {
         //    解析配置类
         //    ComponentScan注解--->扫描路径--->扫描
-        CompoentScan compoentScanAnnotation = (CompoentScan)configClass.getDeclaredAnnotation(CompoentScan.class);
+        CompoentScan compoentScanAnnotation = (CompoentScan) configClass.getDeclaredAnnotation(CompoentScan.class);
         String path = compoentScanAnnotation.value(); //扫描路径
         path = path.replace(".", "/");
         System.out.println(path);
@@ -49,7 +83,21 @@ public class VictorApplicationContext {
                         Class<?> clazz = null;
                         clazz = classLoader.loadClass(className);
                         if (clazz.isAnnotationPresent(Compoent.class)) {
-                            System.out.println(clazz);
+                            // System.out.println(clazz);
+                        //     解析类，判断是单例还是原型bean
+                        //     BeanDefinition
+                            Compoent compoentAnnotation = clazz.getDeclaredAnnotation(Compoent.class);
+                            String beanName = compoentAnnotation.value();
+
+                            BeanDefinition beanDefinition = new BeanDefinition();
+                            beanDefinition.setClazz(clazz);
+                            if (clazz.isAnnotationPresent(Scope.class)) {
+                                Scope scopeAnnotation = clazz.getDeclaredAnnotation(Scope.class);
+                                beanDefinition.setScope(scopeAnnotation.value());
+                            } else {
+                                beanDefinition.setScope("singleton");
+                            }
+                            beanDefinitionMap.put(beanName, beanDefinition);
                         }
                     } catch (ClassNotFoundException e) {
                         throw new RuntimeException(e);
@@ -62,6 +110,21 @@ public class VictorApplicationContext {
     }
 
     public Object getBean(String beanName) {
-        return null;
+        if (beanDefinitionMap.containsKey(beanName)) {
+            BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+            if (beanDefinition.getScope().equals("singleton")) {
+                Object o = singletonObjects.get(beanName);
+                return o;
+            } else {
+            //     原型，创建bean对象
+                Object bean = createBean(beanDefinition);
+                return bean;
+            }
+        } else {
+            // 不存在对应的bean
+            throw  new NullPointerException();
+        }
+
+        // return null;
     }
 }
