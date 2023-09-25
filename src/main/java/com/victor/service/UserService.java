@@ -1,5 +1,6 @@
 package com.victor.service;
 
+import com.spring.Autowired;
 import com.spring.Compoent;
 import com.spring.Scope;
 
@@ -14,5 +15,10 @@ import com.spring.Scope;
 @Compoent("userService")
 // @Scope("prototype")
 public class UserService {
+    @Autowired
+    private OrderService orderService;
 
+    public void test() {
+        System.out.println(orderService);
+    }
 }

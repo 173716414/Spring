@@ -2,6 +2,7 @@ package com.victor;
 
 import com.spring.CompoentScan;
 import com.spring.VictorApplicationContext;
+import com.victor.service.UserService;
 
 /**
  * @Author：Victor_htq
@@ -16,7 +17,8 @@ public class Test {
     public static void main(String[] args) {
         VictorApplicationContext applicationContext = new VictorApplicationContext(AppConfig.class);
 
-        // Object userService = applicationContext.getBean("userService");
+        UserService userService = (UserService) applicationContext.getBean("userService");
+        userService.test();
 
         System.out.println(applicationContext.getBean("userService"));
         System.out.println(applicationContext.getBean("userService"));

@@ -1,6 +1,7 @@
 package com.spring;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +40,17 @@ public class VictorApplicationContext {
         Class clazz = beanDefinition.getClazz();
         try {
             Object instance = clazz.getDeclaredConstructor().newInstance();
+
+            // 依赖注入
+
+            for (Field declaredField : clazz.getDeclaredFields()) {
+                if (declaredField.isAnnotationPresent(Autowired.class)) {
+
+                    Object bean = getBean(declaredField.getName());
+                    declaredField.setAccessible(true);
+                    declaredField.set(instance, bean);
+                }
+            }
             return instance;
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
@@ -57,7 +69,7 @@ public class VictorApplicationContext {
         CompoentScan compoentScanAnnotation = (CompoentScan) configClass.getDeclaredAnnotation(CompoentScan.class);
         String path = compoentScanAnnotation.value(); //扫描路径
         path = path.replace(".", "/");
-        System.out.println(path);
+        // System.out.println(path);
 
         // 扫描
         // Bootstrap ---> jre/lib
@@ -77,7 +89,7 @@ public class VictorApplicationContext {
                 if (filename.endsWith(".class")) {
                     String className = filename.substring(filename.indexOf("com"), filename.indexOf(".class"));
                     className = className.replace("\\", ".");
-                    System.out.println(className);
+                    // System.out.println(className);
                     
                     try {
                         Class<?> clazz = null;
