@@ -1,9 +1,6 @@
 package com.victor.service;
 
-import com.spring.Autowired;
-import com.spring.BeanNameAware;
-import com.spring.Compoent;
-import com.spring.Scope;
+import com.spring.*;
 
 /**
  * @Author：Victor_htq
@@ -15,7 +12,7 @@ import com.spring.Scope;
  */
 @Compoent("userService")
 // @Scope("prototype")
-public class UserService implements BeanNameAware {
+public class UserService implements BeanNameAware, InitializingBean {
     @Autowired
     private OrderService orderService;
 
@@ -28,5 +25,10 @@ public class UserService implements BeanNameAware {
     @Override
     public void setBeanName(String name) {
         beanName = name;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("初始化");
     }
 }

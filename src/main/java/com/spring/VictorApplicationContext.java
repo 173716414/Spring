@@ -51,9 +51,18 @@ public class VictorApplicationContext {
                     declaredField.set(instance, bean);
                 }
             }
-
+            // aware回调
             if (instance instanceof BeanNameAware) {
                 ((BeanNameAware)instance).setBeanName(beanName);
+            }
+
+            // 初始化
+            if (instance instanceof InitializingBean) {
+                try {
+                    ((InitializingBean)instance).afterPropertiesSet();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             return instance;
         } catch (InstantiationException e) {
