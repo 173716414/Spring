@@ -29,13 +29,13 @@ public class VictorApplicationContext {
         for (String beanName : beanDefinitionMap.keySet()) {
             BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
             if (beanDefinition.getScope().equals("singleton")) {
-                Object bean = createBean(beanDefinition);
+                Object bean = createBean(beanName, beanDefinition);
                 singletonObjects.put(beanName, bean);
             }
         }
     }
 
-    public Object createBean(BeanDefinition beanDefinition) {
+    public Object createBean(String beanName, BeanDefinition beanDefinition) {
 
         Class clazz = beanDefinition.getClazz();
         try {
@@ -50,6 +50,10 @@ public class VictorApplicationContext {
                     declaredField.setAccessible(true);
                     declaredField.set(instance, bean);
                 }
+            }
+
+            if (instance instanceof BeanNameAware) {
+                ((BeanNameAware)instance).setBeanName(beanName);
             }
             return instance;
         } catch (InstantiationException e) {
@@ -129,7 +133,7 @@ public class VictorApplicationContext {
                 return o;
             } else {
             //     原型，创建bean对象
-                Object bean = createBean(beanDefinition);
+                Object bean = createBean(beanName, beanDefinition);
                 return bean;
             }
         } else {
